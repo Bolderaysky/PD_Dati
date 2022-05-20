@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Publiskā datubāze</title>
+</head>
+<body>
+    <div class="database">
+        <div class="content-welcome" style="background: white;">
+            <a href="welcome.html"><img src="images/arrow.png" style="width:1.5em; margin-top: 4%;margin-left:5%;"></a>
+            <h1 style="text-align: left; color:#0084F8; font-size: 3rem;position:relative;margin-left:5%; ">Publiskā datubāze</h1>
+            <p style="color:#303030;margin-left:5%;">Šajā datubāzē Tu vari apskatīt pieejamās vielas un aprīkojumu</p>
+            
+            <div style="margin-top:4%;">
+                <input type="search" placeholder="Meklēt" id="search" style="margin-left:5%; width:25%">
+                <button class="btn"  style="border-radius: 2em;margin-left:1%" onclick="ShowAll()">Rādīt visu</button>
+                <button class="btn transparent" style="border-radius: 2em;margin-left:1%" onclick="ShowSubstances()">Rādīt vielas</button>
+                <button class="btn transparent" style="border-radius: 2em;margin-left:1%" onclick="ShowInventory()">Rādīt aprīkojumu</button>
+                <hr style="margin-top: 2%;">
+            </div>
+            
+        </div>
+        <div class="content-data">
+            <table style="border-collapse: collapse; font-size: 1.2em; width:90%; margin-left:5%">
+                <tr >
+                    <th>ID</th>
+                    <th>Nosaukums</th>
+                    <th>Tips</th>
+                    <th>Apakštips</th>
+                    <th>Skaits</th>
+                    <th>Svars</th>
+                    <th>Komentāri</th>
+                </tr>
+                <tr>
+                <tbody id="tableData">
+
+                </tbody>
+            </table>
+            
+        </div>
+        
+
+    </div>
+    <script>
+        
+
+        
+    
+
+        function check(value){
+        if (typeof value == "undefined"){
+            value = "nav datu"
+            return value
+        }
+        else{
+            return value
+        }
+
+        }
+
+        
+        
+        var table = document.getElementById('tableData');
+
+            
+        function buildTable(data){
+            
+            for (var i = 0; i < data.length; i++){
+                
+                var row = `<tr>
+                                <td>${check(data[i].id)}</td>
+                                <td>${check(data[i].nosaukums)}</td>
+                                <td>${check(data[i].tips)}</td>
+                                <td>${check(data[i].apakstips)}</td>
+                                <td>${check(data[i].skaits)}</td>
+                                <td>${data[i].daudzums ? check(data[i].daudzums)+data[i].mervienibas : check(data[i].svars)}</td>
+                                <td>${check(data[i].komentari)}</td>
+                            </tr>
+                `;
+                table.innerHTML += row;
+            }
+        }
+
+        async function getAllJson(...urls){
+            try {
+                table.innerHTML = "";
+                var data = await Promise.all(
+                    urls.map(
+                        url =>
+                        fetch(url).then(
+                            response => {
+                                if(!response.ok){
+                                    throw new Error("Error");
+                                }
+                                return response.json();
+                            }
+                        ).then(json => {
+                            data = json;
+                            buildTable(data);
+                        })
+                        ));
+                        
+            } catch(error){
+                console.log(error);
+
+                throw(error);
+            }
+        }
+
+        function ShowInventory(){
+            getAllJson("./data/inventars.json");      
+        }
+
+        function ShowSubstances(){
+            getAllJson("./data/vielas.json");
+        }
+
+
+        function ShowAll(){
+            getAllJson("./data/vielas.json", "./data/inventars.json");
+        }
+
+        
+
+        
+    </script>
+</body>
+</html>
